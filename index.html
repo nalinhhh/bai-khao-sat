@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khảo Sát Phong Cách Học Tập</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --primary-light: #EEF2FF;
+            --danger: #EF4444;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --border: #E2E8F0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-main);
+            padding: 16px 16px 100px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 760px; margin: 0 auto; background: white;
+            border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(255,255,255,0.98); backdrop-filter: blur(10px);
+            padding: 16px 20px; border-bottom: 1px solid var(--border);
+        }
+        .header-top {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px; gap: 12px;
+        }
+        .header h1 {
+            font-size: 1.05rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), #8B5CF6);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .counter {
+            background: var(--primary-light); color: var(--primary-dark);
+            padding: 6px 14px; border-radius: 20px; font-size: 0.85rem;
+            font-weight: 700; white-space: nowrap; transition: all 0.3s;
+        }
+        .counter.complete { background: #D1FAE5; color: #047857; }
+        .progress-container {
+            width: 100%; background: var(--border); border-radius: 10px;
+            height: 8px; overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%; background: linear-gradient(90deg, var(--primary), #8B5CF6, #EC4899);
+            width: 0%; border-radius: 10px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .content { padding: 24px 20px; }
+        .intro {
+            background: linear-gradient(135deg, #EEF2FF, #F5F3FF);
+            border-left: 4px solid var(--primary);
+            padding: 14px 16px; border-radius: 8px;
+            font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;
+        }
+        .intro strong { color: var(--primary-dark); }
+        .section-title {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 1.05rem; font-weight: 800; color: var(--text-main);
+            margin: 32px 0 16px; padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        .section-title:first-of-type { margin-top: 8px; }
+        .section-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--primary), #8B5CF6);
+            color: white; border-radius: 10px; font-size: 0.95rem;
+        }
+        .question-card {
+            background: white; border: 2px solid var(--border);
+            border-radius: 14px; padding: 18px; margin-bottom: 14px;
+            transition: all 0.25s ease; scroll-margin-top: 110px;
+        }
+        .question-card:hover { border-color: #C7D2FE; }
+        .question-card.answered {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #FFFFFF, #F5F3FF);
+        }
+        .question-card.missing {
+            border-color: var(--danger); background: #FEF2F2;
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .question-text {
+            font-weight: 700; margin-bottom: 14px; font-size: 1rem;
+            display: flex; gap: 10px; align-items: flex-start;
+        }
+        .q-number {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 26px; height: 26px; background: var(--primary-light);
+            color: var(--primary-dark); border-radius: 8px;
+            font-size: 0.8rem; font-weight: 800; flex-shrink: 0;
+            transition: all 0.25s;
+        }
+        .question-card.answered .q-number {
+            background: var(--primary); color: white;
+        }
+        .option-label {
+            display: flex; align-items: flex-start; padding: 12px 14px;
+            background: white; border: 2px solid var(--border);
+            border-radius: 10px; margin-bottom: 10px;
+            cursor: pointer; transition: all 0.2s ease; position: relative;
+        }
+        .option-label:last-child { margin-bottom: 0; }
+        .option-label:hover {
+            border-color: #A5B4FC; background: #FAFAFF;
+            transform: translateY(-1px);
+        }
+        .option-label input[type="radio"] {
+            position: absolute; opacity: 0; pointer-events: none;
+        }
+        .custom-radio {
+            width: 20px; height: 20px; border: 2px solid var(--border);
+            border-radius: 50%; margin-right: 12px; margin-top: 1px;
+            flex-shrink: 0; display: flex; align-items: center;
+            justify-content: center; transition: all 0.2s;
+        }
+        .custom-radio::after {
+            content: ''; width: 10px; height: 10px;
+            background: var(--primary); border-radius: 50%;
+            transform: scale(0); transition: transform 0.2s;
+        }
+        .option-label input[type="radio"]:checked ~ .custom-radio {
+            border-color: var(--primary); background: var(--primary-light);
+        }
+        .option-label input[type="radio"]:checked ~ .custom-radio::after {
+            transform: scale(1);
+        }
+        .option-label:has(input[type="radio"]:checked) {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, #EEF2FF, #F5F3FF);
+            box-shadow: 0 2px 8px rgba(99,102,241,0.15);
+        }
+        .option-text { font-size: 0.92rem; flex: 1; }
+        .option-label:has(input:checked) .option-text {
+            font-weight: 600; color: var(--primary-dark);
+        }
+        .footer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(10px); padding: 14px 16px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08); z-index: 100;
+        }
+        .footer-inner {
+            max-width: 760px; margin: 0 auto;
+            display: flex; gap: 12px; align-items: center;
+        }
+        .footer-info {
+            flex: 1; font-size: 0.85rem; color: var(--text-muted);
+            font-weight: 600;
+        }
+        .footer-info strong { color: var(--primary-dark); }
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary), #8B5CF6);
+            color: white; border: none; padding: 12px 24px;
+            border-radius: 12px; font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; transition: all 0.25s;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+            white-space: nowrap; font-family: inherit;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99,102,241,0.45);
+        }
+        .btn-submit:active { transform: translateY(0); }
+        .toast {
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--danger); color: white; padding: 14px 24px;
+            border-radius: 12px; font-weight: 600; font-size: 0.9rem;
+            box-shadow: 0 10px 30px rgba(239,68,68,0.4);
+            z-index: 200; transition: transform 0.3s ease;
+            max-width: 90%; text-align: center;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        #result-section { display: none; padding: 30px 20px; }
+        .result-header {
+            text-align: center; margin-bottom: 30px; padding: 24px;
+            background: linear-gradient(135deg, var(--primary), #8B5CF6);
+            border-radius: 16px; color: white;
+        }
+        .result-header h2 { font-size: 1.5rem; margin-bottom: 8px; }
+        .result-header p { opacity: 0.9; font-size: 0.9rem; }
+        .result-card {
+            background: white; border: 2px solid var(--border);
+            border-radius: 14px; padding: 20px; margin-bottom: 16px;
+            transition: all 0.25s;
+        }
+        .result-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(99,102,241,0.15);
+        }
+        .result-dim-name {
+            font-weight: 800; font-size: 1.05rem; color: var(--text-main);
+            margin-bottom: 12px;
+        }
+        .score-bar {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+        }
+        .score-bar-track {
+            flex: 1; height: 12px;
+            background: linear-gradient(90deg, #FCA5A5, #FCD34D, #93C5FD, #6EE7B7);
+            border-radius: 10px; position: relative; overflow: hidden;
+        }
+        .score-bar-fill {
+            position: absolute; top: 0; bottom: 0;
+            background: linear-gradient(135deg, var(--primary), #8B5CF6);
+            border-radius: 10px;
+        }
+        .score-value {
+            font-size: 1.4rem; font-weight: 800; color: var(--primary-dark);
+            min-width: 50px; text-align: right;
+        }
+        .result-tag {
+            display: inline-block; padding: 4px 12px;
+            background: var(--primary-light); color: var(--primary-dark);
+            border-radius: 20px; font-size: 0.8rem; font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .result-style-name {
+            font-size: 1.15rem; font-weight: 800; color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .result-desc {
+            font-size: 0.9rem; color: var(--text-muted); line-height: 1.7;
+        }
+        .result-desc strong { color: var(--text-main); }
+        @media (max-width: 600px) {
+            body { padding: 10px 10px 100px; }
+            .content { padding: 16px 14px; }
+            .header { padding: 12px 14px; }
+            .header h1 { font-size: 0.95rem; }
+            .counter { font-size: 0.75rem; padding: 5px 10px; }
+            .question-card { padding: 14px; }
+            .question-text { font-size: 0.95rem; }
+            .option-text { font-size: 0.88rem; }
+            .footer-info { font-size: 0.78rem; }
+            .btn-submit { padding: 10px 18px; font-size: 0.88rem; }
+            .result-header h2 { font-size: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="header-top">
+            <h1>🎓 Khảo Sát Phong Cách Học Tập</h1>
+            <div class="counter" id="counter">0/44</div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <div class="content" id="survey-section">
+        <div class="intro">
+            <strong>Hướng dẫn:</strong> Với mỗi câu hỏi, chọn phương án <strong>A</strong> hoặc <strong>B</strong> mô tả đúng nhất thói quen học tập của bạn. Hãy trả lời theo phản xạ đầu tiên, không cần suy nghĩ quá lâu. Bạn có thể cuộn xuống và bấm <strong>"Xem Kết Quả"</strong> khi đã hoàn thành tất cả.
+        </div>
+        <form id="surveyForm" novalidate></form>
+    </div>
+
+    <div id="result-section">
+        <div class="result-header">
+            <h2>✨ Kết Quả Phong Cách Học Tập</h2>
+            <p>Dựa trên mô hình Felder-Silverman</p>
+        </div>
+        <div id="result-cards"></div>
+        <button class="btn-submit" style="width: 100%; margin-top: 12px;" onclick="location.reload()">🔄 Làm Lại Khảo Sát</button>
+    </div>
+</div>
+
+<div class="footer" id="footer">
+    <div class="footer-inner">
+        <div class="footer-info" id="footerInfo">Đã trả lời <strong>0</strong> / 44 câu</div>
+        <button type="button" class="btn-submit" id="submitBtn">Xem Kết Quả →</button>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const questions = [
+    { id: 'AR', text: 'Khi học một khái niệm mới, tôi thường:', a: 'Thử áp dụng ngay để xem nó hoạt động ra sao', b: 'Dành thời gian suy nghĩ và đọc lại để hiểu trước khi làm' },
+    { id: 'AR', text: 'Khi làm bài nhóm, tôi thường:', a: 'Chủ động đề xuất ý tưởng và điều phối công việc', b: 'Lắng nghe, quan sát rồi mới góp ý' },
+    { id: 'AR', text: 'Trong một buổi học dài, tôi cảm thấy:', a: 'Khó tập trung nếu chỉ nghe giảng mà không được làm hay thảo luận', b: 'Thoải mái ghi chép và suy ngẫm nội dung' },
+    { id: 'AR', text: 'Để ghi nhớ bài học, tôi thường:', a: 'Giải thích lại cho người khác hoặc làm bài tập', b: 'Đọc lại ghi chú và tự tóm tắt bằng văn bản riêng' },
+    { id: 'AR', text: 'Khi gặp một bài tập khó, tôi thường:', a: 'Thử ngay nhiều cách để xem cách nào hiệu quả', b: 'Cân nhắc kỹ đề bài và các phương án trước khi chọn cách làm' },
+    { id: 'AR', text: 'Tôi cảm thấy học hiệu quả hơn khi:', a: 'Được thực hành, thí nghiệm hoặc mô phỏng', b: 'Có thời gian yên tĩnh để tự đọc và suy nghĩ' },
+    { id: 'AR', text: 'Khi tiếp nhận thông tin mới, tôi có xu hướng:', a: 'Thực hành ngay và điều chỉnh trong quá trình làm', b: 'Đọc kỹ và suy ngẫm về ý nghĩa trước khi hành động' },
+    { id: 'AR', text: 'Khi thảo luận trên lớp, tôi thường:', a: 'Phát biểu ngay khi có ý tưởng', b: 'Suy nghĩ kỹ rồi mới phát biểu khi đã chắc chắn' },
+    { id: 'AR', text: 'Khi phải học một nội dung khó, tôi thích:', a: 'Làm việc nhóm và trao đổi liên tục', b: 'Làm việc độc lập, có không gian riêng để suy nghĩ' },
+    { id: 'AR', text: 'Khi học một kỹ thuật hoặc công cụ mới, tôi thường:', a: 'Thử ngay để xem kết quả, rồi tìm hiểu thêm', b: 'Đọc tài liệu và hiểu nguyên lý trước khi thử' },
+    { id: 'AR', text: 'Khi ôn tập, tôi thường:', a: 'Tự làm lại bài tập và thử các biến thể', b: 'Xem lại và suy ngẫm về những gì đã học' },
+    { id: 'SI', text: 'Khi học một lý thuyết mới, tôi muốn biết trước:', a: 'Các ví dụ cụ thể và cách ứng dụng thực tế', b: 'Nguyên lý chung và ý nghĩa của nó' },
+    { id: 'SI', text: 'Tôi thường nhớ tốt hơn:', a: 'Sự kiện, số liệu và chi tiết cụ thể', b: 'Ý tưởng và khái niệm' },
+    { id: 'SI', text: 'Môn học tôi thích hơn là môn có:', a: 'Bài tập thực hành với kết quả cụ thể, kiểm chứng được', b: 'Lý thuyết tổng quát và các mô hình trừu tượng' },
+    { id: 'SI', text: 'Tôi cảm thấy thoải mái hơn khi:', a: 'Làm việc với dữ liệu thực tế và quy trình rõ ràng', b: 'Khám phá các khả năng mới và đặt ra giả thuyết' },
+    { id: 'SI', text: 'Khi giải một bài toán, tôi thường:', a: 'Áp dụng quy trình đã biết và kiểm tra từng bước', b: 'Tìm một cách tiếp cận mới, đôi khi bỏ qua vài bước' },
+    { id: 'SI', text: 'Tôi đánh giá cao môn học có:', a: 'Liên hệ rõ ràng với thực tiễn đời sống', b: 'Tính sáng tạo và chiều sâu lý thuyết' },
+    { id: 'SI', text: 'Khi gặp một chi tiết nhỏ trong bài, tôi:', a: 'Chú ý và kiểm tra kỹ lưỡng', b: 'Dễ bỏ qua để tập trung vào ý chính' },
+    { id: 'SI', text: 'Khi tìm hiểu một hiện tượng, tôi quan tâm nhiều hơn đến:', a: '"Làm thế nào" và các bước cụ thể', b: '"Tại sao" và nguyên lý ẩn phía sau' },
+    { id: 'SI', text: 'Tôi dễ nhớ hơn những điều:', a: 'Đã thấy hoặc làm trực tiếp qua trải nghiệm', b: 'Liên quan đến ý tưởng và mối liên hệ giữa các khái niệm' },
+    { id: 'SI', text: 'Khi đối mặt với tình huống mở, không có đáp án sẵn, tôi:', a: 'Thấy khó chịu, muốn có đề bài rõ ràng và đáp án cụ thể', b: 'Thấy thoải mái và thích khám phá' },
+    { id: 'SI', text: 'Khi học một kỹ năng mới, tôi thường:', a: 'Làm theo hướng dẫn từng bước đã được trình bày', b: 'Thử các cách tiếp cận sáng tạo, không theo mẫu có sẵn' },
+    { id: 'VV', text: 'Khi học một quy trình mới, tôi nhớ tốt hơn khi có:', a: 'Sơ đồ và hình minh họa', b: 'Văn bản mô tả chi tiết hoặc lời giải thích' },
+    { id: 'VV', text: 'Khi cần trình bày một ý tưởng, tôi thích:', a: 'Vẽ sơ đồ, biểu đồ hoặc dùng hình ảnh', b: 'Nói hoặc viết thành đoạn văn rõ ràng' },
+    { id: 'VV', text: 'Khi đọc một tài liệu mới, tôi thường:', a: 'Xem bảng biểu và hình minh họa trước', b: 'Đọc từ đầu đến cuối phần văn bản' },
+    { id: 'VV', text: 'Tôi thấy dễ hiểu hơn khi:', a: 'Xem video, mô phỏng hoặc sơ đồ minh họa', b: 'Nghe giảng viên diễn giải bằng lời' },
+    { id: 'VV', text: 'Khi ghi chú bài giảng, tôi thường:', a: 'Vẽ sơ đồ tư duy, nối các ý bằng hình', b: 'Ghi lại câu chữ và các ý chính bằng văn bản' },
+    { id: 'VV', text: 'Khi phải nhớ một danh sách khái niệm, tôi thường:', a: 'Hình dung chúng trong đầu dưới dạng hình ảnh', b: 'Nhắc lại thành lời hoặc viết thành câu' },
+    { id: 'VV', text: 'Môn học tôi thích hơn là môn có:', a: 'Nhiều hình ảnh, biểu đồ và video', b: 'Nhiều bài đọc và giải thích bằng lời' },
+    { id: 'VV', text: 'Khi học một thuật ngữ mới, tôi:', a: 'Ghi nhớ kèm hình minh họa', b: 'Ghi nhớ qua định nghĩa và câu ví dụ' },
+    { id: 'VV', text: 'Khi đọc hướng dẫn kỹ thuật, tôi thích tài liệu có:', a: 'Ảnh chụp màn hình và sơ đồ đi kèm', b: 'Mô tả văn bản rõ ràng từng bước' },
+    { id: 'VV', text: 'Khi có người giải thích cho tôi, tôi nhớ tốt hơn nếu họ:', a: 'Đưa ra hình vẽ hoặc ví dụ trực quan', b: 'Diễn đạt rõ ràng bằng lời nói' },
+    { id: 'VV', text: 'Khi tự học một chủ đề, tôi thích tài liệu:', a: 'Infographic hoặc slide nhiều hình ảnh', b: 'Bài viết hoặc sách có nội dung chi tiết' },
+    { id: 'SG', text: 'Khi học một nội dung mới, tôi thích:', a: 'Học theo trình tự từ cơ bản đến nâng cao', b: 'Xem bức tranh toàn cảnh trước rồi mới đi vào chi tiết' },
+    { id: 'SG', text: 'Khi làm một bài toán nhiều bước, tôi:', a: 'Làm theo từng bước đã định, không nhảy cóc', b: 'Đôi khi nhảy thẳng tới kết quả rồi kiểm tra ngược lại các bước' },
+    { id: 'SG', text: 'Khi một bài giảng bỏ qua bước trung gian, tôi:', a: 'Cần quay lại bổ sung các bước còn thiếu', b: 'Vẫn hiểu được vì đã nắm ý chính' },
+    { id: 'SG', text: 'Tôi nhớ tốt hơn khi kiến thức:', a: 'Có thứ tự logic rõ ràng', b: 'Được kết nối thành một hệ thống tổng thể' },
+    { id: 'SG', text: 'Khi lập kế hoạch học tập, tôi thường:', a: 'Chia nhỏ theo thứ tự và bám sát lộ trình', b: 'Nắm mục tiêu lớn và linh hoạt sắp xếp các phần' },
+    { id: 'SG', text: 'Khi gặp một điều chưa hiểu, tôi thường:', a: 'Quay lại kiểm tra từng khái niệm nền tảng', b: 'Tìm mối liên hệ với kiến thức khác, rồi bỗng hiểu ra' },
+    { id: 'SG', text: 'Khi vừa học xong một phần, tôi:', a: 'Cần nắm rõ từng chi tiết trước khi qua phần tiếp theo', b: 'Có thể chuyển sang phần khác và sau đó hiểu toàn bộ' },
+    { id: 'SG', text: 'Khi phải giải thích cách mình đi đến kết luận, tôi:', a: 'Trình bày được từng bước suy luận rõ ràng', b: 'Thường nêu kết luận trước và khó giải thích từng bước' },
+    { id: 'SG', text: 'Khi học theo giáo trình, tôi thường:', a: 'Học theo thứ tự từng chương', b: 'Muốn xem cấu trúc toàn bộ khóa học ngay từ đầu' },
+    { id: 'SG', text: 'Khi học một ngôn ngữ mới, tôi thích:', a: 'Học ngữ pháp từng bước một', b: 'Tiếp xúc với nhiều câu trong ngữ cảnh rồi tự rút ra quy tắc' },
+    { id: 'SG', text: 'Khi đọc một cuốn sách dày, tôi thường:', a: 'Đọc đúng thứ tự các chương', b: 'Đọc mục lục và phần kết luận trước để nắm ý chính' }
+];
+
+const sectionNames = {
+    'AR': 'Phần A: Xử lý thông tin (Active ↔ Reflective)',
+    'SI': 'Phần B: Nhận thức thông tin (Sensing ↔ Intuitive)',
+    'VV': 'Phần C: Tiếp nhận thông tin (Visual ↔ Verbal)',
+    'SG': 'Phần D: Hiểu thông tin (Sequential ↔ Global)'
+};
+const sectionIcons = { 'AR': '⚡', 'SI': '🔍', 'VV': '👁️', 'SG': '🧩' };
+
+const form = document.getElementById('surveyForm');
+const counterEl = document.getElementById('counter');
+const progressBar = document.getElementById('progressBar');
+const footerInfo = document.getElementById('footerInfo');
+const submitBtn = document.getElementById('submitBtn');
+const toast = document.getElementById('toast');
+
+let currentSection = '';
+
+questions.forEach((q, index) => {
+    if (q.id !== currentSection) {
+        currentSection = q.id;
+        const title = document.createElement('div');
+        title.className = 'section-title';
+        title.innerHTML = `<span class="section-icon">${sectionIcons[currentSection]}</span>${sectionNames[currentSection]}`;
+        form.appendChild(title);
+    }
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `q-card-${index}`;
+    card.innerHTML = `
+        <div class="question-text">
+            <span class="q-number">${index + 1}</span>
+            <span>${q.text}</span>
+        </div>
+        <label class="option-label">
+            <input type="radio" name="q${index}" value="A">
+            <span class="custom-radio"></span>
+            <span class="option-text"><strong>A.</strong> ${q.a}</span>
+        </label>
+        <label class="option-label">
+            <input type="radio" name="q${index}" value="B">
+            <span class="custom-radio"></span>
+            <span class="option-text"><strong>B.</strong> ${q.b}</span>
+        </label>
+    `;
+    form.appendChild(card);
+});
+
+function updateProgress() {
+    const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+    const total = questions.length;
+    progressBar.style.width = (answered / total) * 100 + '%';
+    if (answered === total) {
+        counterEl.classList.add('complete');
+        counterEl.textContent = `✓ ${answered}/${total}`;
+    } else {
+        counterEl.classList.remove('complete');
+        counterEl.textContent = `${answered}/${total}`;
+    }
+    footerInfo.innerHTML = `Đã trả lời <strong>${answered}</strong> / ${total} câu`;
+}
+
+form.addEventListener('change', (e) => {
+    if (e.target.type === 'radio') {
+        const card = e.target.closest('.question-card');
+        card.classList.add('answered');
+        card.classList.remove('missing');
+        updateProgress();
+    }
+});
+
+function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+submitBtn.addEventListener('click', () => {
+    const unanswered = [];
+    questions.forEach((_, i) => {
+        if (!document.querySelector(`input[name="q${i}"]:checked`)) unanswered.push(i);
+    });
+
+    if (unanswered.length > 0) {
+        showToast(`⚠️ Bạn còn ${unanswered.length} câu chưa trả lời!`);
+        unanswered.forEach(i => document.getElementById(`q-card-${i}`).classList.add('missing'));
+        const first = document.getElementById(`q-card-${unanswered[0]}`);
+        setTimeout(() => first.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+        setTimeout(() => {
+            unanswered.forEach(i => document.getElementById(`q-card-${i}`).classList.remove('missing'));
+        }, 2500);
+        return;
+    }
+
+    const scores = { AR: 0, SI: 0, VV: 0, SG: 0 };
+    questions.forEach((q, i) => {
+        const val = document.querySelector(`input[name="q${i}"]:checked`).value;
+        scores[q.id] += (val === 'A' ? 1 : -1);
+    });
+    showResults(scores);
+});
+
+function showResults(scores) {
+    document.getElementById('survey-section').style.display = 'none';
+    document.getElementById('footer').style.display = 'none';
+    document.getElementById('result-section').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const container = document.getElementById('result-cards');
+    container.innerHTML = '';
+    const interpretations = {
+        'AR': { pos: 'Active (Năng động)', neg: 'Reflective (Suy ngẫm)' },
+        'SI': { pos: 'Sensing (Giác quan)', neg: 'Intuitive (Trực giác)' },
+        'VV': { pos: 'Visual (Thị giác)', neg: 'Verbal (Ngôn ngữ)' },
+        'SG': { pos: 'Sequential (Tuần tự)', neg: 'Global (Tổng thể)' }
+    };
+
+    for (const [dim, score] of Object.entries(scores)) {
+        const absScore = Math.abs(score);
+        const isPos = score >= 0;
+        const styleName = isPos ? interpretations[dim].pos : interpretations[dim].neg;
+        const oppositeName = isPos ? interpretations[dim].neg : interpretations[dim].pos;
+        let tag, desc;
+        if (absScore >= 8) {
+            tag = 'Ưu tiên mạnh';
+            desc = `Bạn có thiên hướng rất rõ rệt về phong cách <strong>${styleName}</strong>. Bạn sẽ học tập hiệu quả nhất khi môi trường và phương pháp giảng dạy đáp ứng được phong cách này. Nếu gặp môi trường thiên về ${oppositeName}, bạn có thể sẽ cảm thấy khó khăn hoặc mất tập trung.`;
+        } else if (absScore >= 4) {
+            tag = 'Ưu tiên trung bình';
+            desc = `Bạn khá yêu thích phong cách <strong>${styleName}</strong>. Bạn vẫn có thể thích nghi tốt với phong cách ${oppositeName} nếu có sự hướng dẫn hoặc nỗ lực cá nhân, nhưng bạn sẽ cảm thấy thoải mái hơn với ${styleName}.`;
+        } else {
+            tag = 'Cân bằng';
+            desc = `Bạn không có sự thiên vị rõ rệt giữa <strong>${styleName}</strong> và <strong>${oppositeName}</strong>. Đây là một lợi thế lớn vì bạn có thể học tốt trong cả hai môi trường, linh hoạt thích ứng với nhiều phương pháp giảng dạy khác nhau.`;
+        }
+
+        const pct = (absScore / 11) * 50;
+        const fillStyle = isPos
+            ? `left: 50%; width: ${pct}%;`
+            : `right: 50%; width: ${pct}%;`;
+
+        const card = document.createElement('div');
+        card.className = 'result-card';
+        card.innerHTML = `
+            <div class="result-dim-name">${sectionNames[dim].split(':')[1].trim()}</div>
+            <div class="score-bar">
+                <div class="score-bar-track">
+                    <div class="score-bar-fill" style="${fillStyle}"></div>
+                </div>
+                <div class="score-value">${score > 0 ? '+' : ''}${score}</div>
+            </div>
+            <div class="result-tag">${tag}</div>
+            <div class="result-style-name">${styleName}</div>
+            <div class="result-desc">${desc}</div>
+        `;
+        container.appendChild(card);
+    }
+}
+</script>
+
+</body>
+</html>
